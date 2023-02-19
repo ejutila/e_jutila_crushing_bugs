@@ -1,75 +1,78 @@
-// select your elements first - what is the user going to interact with?
-// there are the targets => these are what the "user" uses
-// this is a 1 to 1 connection to an element in the DOM
-// let navButton = document.querySelector("#navButton");
+// variables always go at the top -> this is step 1
+// these are the connections that you're making to elements on the page 
+// use CSS selectors to make connections to elements with JavaScript
 
-// this is a 1 to many connection to elements in the DOM
-// the variable name is the "basket"
-let navButtons = document.querySelectorAll('#buttonHolder img'),
-	theHeadline = document.querySelector('#headLine h1'),
-	// collect ALL of the draggable pieces in the drag zone
-	puzzlePieces = document.querySelectorAll('.puzzle-pieces img'),
-	// collect ALL of the drop zone elements
+// create a 1 to 1 connection with a variable -> querySelector("queryString")
+// let theButton = document.querySelector("#buttonOne");
+
+// create a 1 to many connection with a variable -> querySelectorAll("queryString")
+let theButtons = document.querySelectorAll("#buttonHolder img"),
+	theHeading = document.querySelector("#headLine h1"),
+	puzzleBoard = document.querySelector(".puzzle-board"),
+	puzzlePieces = document.querySelectorAll(".puzzle-pieces img"),
 	dropZones = document.querySelectorAll('.drop-zone'),
-	puzzleBoard = document.querySelector('.puzzle-board'),
-	tempLink = document.querySelector('a'),
-	// set up a global variable to store a reference to the dragged piece
-	// i need to know this later when i drop it on a zone
+	// store the dragged piece in a global variable
+	// because we need it in the handleDrop function
 	draggedPiece;
 
-// functions go in the middle
-// these are the "actions" that should happen
-function changeBGImage() {	
-	// change the background image in the drop zone
-	// the `${}` is called a JavaScript Template String - whatever is inside the curly
-	// braces is evaluated at runtime and interpolated (replaces the bracket notation)
-
-	// you can use variables, functions, etc inline in your code this way
+// step 3
+// functionality always goes in the middle -> how do we want
+// the app to behave?
+function changeBGImage() {
+	// update the background image
 	puzzleBoard.style.backgroundImage = `url(images/backGround${this.id}.jpg)`;
+
+	// clear drop zone contents
+	dropZones.forEach(zone => {
+		while (zone.children.length > 0) {
+			puzzleBoard.appendChild(zone.children[0]);
+		}
+	});
 }
 
-function handleStartDrag() { console.log('started dragging this piece', this); 
-	// store the element I am currently dragging in that global draggedPiece variable
+function handleStartDrag() { 
+	console.log('started dragging this piece:', this);
+
+	// store a reference to the puzzle piece image that we're dragging
+	// so we can use it later and move it to a drop zone
 	draggedPiece = this;
 }
 
 function handleDragOver(e) { 
-	e.preventDefault(); //e is shorthnad for event
-	// this overrides the default dragover behaviour
-	console.log('dragged over me')
-}
-
-function handleDrop(e) {
-	// block the default behaviour 
-	e.preventDefault();
-	// and then do whatever you want.
-	console.log('dropped on me!');
-	e.target.appendChild(draggedPiece);
-}
-
-// event handling at the bottom -> how things react when you use the targets
-// how is the user going to interact with the elements / controls you provide?
-
-// 1 to 1 event handling (1 variable, one element):
-// navButton.addEventListener('click', changeBGImage);
-
-// 1 to many event handling (1 variable, many elements):
-// process a collection of elements and add an event handler to each
-navButtons.forEach(button => button.addEventListener('click', changeBGImage));
-// add the drag start handler to all of the puzzle pieces
-puzzlePieces.forEach(piece => piece.addEventListener('dragstart', handleStartDrag));
-// add the dragover handling to the drop zones
-dropZones.forEach(zone => zone.addEventListener('dragover', handleDragOver));
-dropZones.forEach(zone => zone.addEventListener('drop', handleDrop));
-
-function blockDefaultBehaviour(e) { // e is shorthand for event -> in this case the nav event
-	// don't let the default behaviour of certain elements happen - block it
 	e.preventDefault(); // e is shorthand for event
-	//this overrides the default dragover behaviour
-	console.log('do whatever we want instead')
+	// this overrides the default dragover behaviour
+	console.log('dragged over me'); 
 }
 
-// temp handling
-tempLink.addEventListener('click', blockDefaultBehaviour);
+function handleDrop(e) { 
+	e.preventDefault();
+	console.log('dropped something on me');
+	if (this.children.length > 0) {
+		console.log('Puzzle piece already here');
+		return;
+	}
+	// bug fix #1 should go here, and it's at most 3 lines of JS code
 
-theNavEl.addEventListener('click', block)
+	// this line is going to move the dragged piece from the left side of the board
+	// into whatever drop zone we choose. appendChild means "add element to the container"
+	this.appendChild(draggedPiece);
+}
+// step 2
+// event handling always goes at the bottom => 
+// how do we want users to interact with our app
+
+// 1 to 1 event handling
+//theButton.addEventListener("click", changeBGImage);
+
+// 1 to many event handling
+// add event handling to each button in the collection of buttons, one at a time
+theButtons.forEach(button => button.addEventListener("click", changeBGImage));
+
+// add the drag event handling to the puzzle pieces
+puzzlePieces.forEach(piece => piece.addEventListener("dragstart", handleStartDrag));
+
+// add the dragover AND the drop event handling to the drop zones
+dropZones.forEach(zone => zone.addEventListener("dragover", handleDragOver));
+
+// add the drop event handling
+dropZones.forEach(zone => zone.addEventListener("drop", handleDrop));
